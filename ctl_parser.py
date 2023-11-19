@@ -81,6 +81,8 @@ def p_formula(p):
             p[0] = p[2]
         elif p[1] in ('A', 'E') and p[2] in ('X', 'G', 'F'):
             p[0] = (p[1] + p[2], p[3])
+        elif p[1] in ('A', 'E') and p[3] == 'U':
+            p[0] = (p[1] + p[2], p[3])
         else:
             p[0] = (p[2], p[1], p[3])
      
@@ -111,12 +113,14 @@ parser = yacc.yacc()
 
 # Exemple d'utilisation du parseur
 for input_formula in [
-    "AX (not Q) U (P v Q)",
-    "E X (P) ",
-    "E X (P ^ Q) ",
-    "E ( not Q ) U ( P v Q ) ",
-    "E ( P v Q ) U ( Q ^ not P ) ",
-    "A ( E ( P ) ) U ( A ( P ) U ( not Q ))"]:
+"E X (P)",
+"E X (P ^ Q)",
+"E ( not Q ) U ( P v Q )",
+"E ( P v Q ) U ( Q ^ not P )",
+"A ( E X ( P ) ) U ( A ( P ) U ( not Q ) )"
+   ]:
     parsed_tree = parser.parse(input_formula, lexer=lexer)
     print(parsed_tree)
+
+
 
