@@ -5,3 +5,5 @@ automate.dot
 automate.png
 
 .vscode
+myenv
+model_checking_env
