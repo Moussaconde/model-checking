@@ -6,6 +6,9 @@ sudo apt update
 # Installation de Python 3
 sudo apt install python3
 
+# Installation de Python 3
+sudo apt install -y python3.10-venv
+
 # Créer un environnement virtuel
 python3 -m venv model_checking_env
 
@@ -16,5 +19,3 @@ source model_checking_env/bin/activate
 pip install -r requirements.txt
 
 chmod +x main.py
-
-source model_checking_env/bin/activate
