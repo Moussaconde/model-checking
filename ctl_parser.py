@@ -19,6 +19,7 @@ tokens = (
     'E',
     'A',
     'U',
+    'IMPL',
     'LPAREN',
     'RPAREN',
 )
@@ -35,12 +36,13 @@ t_E = r'E'
 t_U = r'U'
 t_X = r'X'
 t_A = r'A'
+t_IMPL = r'=>'
 t_LPAREN = r'\('
 t_RPAREN = r'\)'
 t_ID = r'[B-DH-MP-SWY-Zb-dh-mp-swy-z0-9]+'
 
 # Ignorer les espaces et les tabulations
-t_ignore = ' \t'
+t_ignore = ' \t \n'
 
 
 # Operator precedence and associativity
@@ -74,6 +76,7 @@ def p_formula(p):
             | A X formula
             | A G formula
             | A F formula
+            | formula IMPL formula
     """
  
     if len(p) == 2:
@@ -200,6 +203,8 @@ class CTL_Evaluateur:
                 return self.OR(formula)
             elif operator == 'not':
                 return self.NOT(formula)
+            elif operator == '=>':
+                return self.IMPL(formula)
             elif operator == 'ID':
                 return self.ID(formula)
             
@@ -257,8 +262,6 @@ class CTL_Evaluateur:
         _, *operands = formula
 
         leftFormula = operands[0][1]
-
-        print("operands ", operands[0][2])
 
         rightFormula = operands[0][2]
 
@@ -360,9 +363,6 @@ class CTL_Evaluateur:
         leftFormula = operands[0][1]
         rightFormula = operands[0][2]
 
-        print("leftFormula ",leftFormula)
-        print("rightFormula ",rightFormula)
-
         self.mark_formula(leftFormula)
         self.mark_formula(rightFormula)
 
@@ -431,10 +431,10 @@ class CTL_Evaluateur:
 
         _, innerformula = formula
 
-        
-        print("inerformula ",innerformula)
-
+   
         equivalent_formula = ('not',('E',('U','true',('not',innerformula))))
+
+        print("equivalent_formula",equivalent_formula)
 
         self.mark_formula(equivalent_formula)
 
@@ -442,6 +442,29 @@ class CTL_Evaluateur:
 
         self.verified_formulas[formula] = self.markings[formula][self.automate.init_node]
 
+    # I want to implement the IMPL formula so that I can use it in the CTL parser
+    # Normally I should use the same methodolgy as the other formulas where i use equivalent formulas 
+    # I want you to implement it in the same way as the other formulas
+
+    def IMPL(self,formula):
+        print("Appel à IMPL ---------> ")
+
+        self.mark_states_to_false(formula)
+
+        print(formula)
+
+        _, *innerformula = formula
+
+        
+        print("inerformula ",innerformula)
+
+        equivalent_formula = ('v',('not',innerformula[0]),innerformula[1])
+
+        self.mark_formula(equivalent_formula)
+
+        self.markings[formula] = self.markings[equivalent_formula]
+
+        self.verified_formulas[formula] = self.markings[formula][self.automate.init_node]
 
 
 
@@ -484,6 +507,12 @@ class CTL_Evaluateur:
         
         self.verified_formulas[formula] = (self.verified_formulas[leftFormula] or self.verified_formulas[rightFormula]) if rightFormula in self.verified_formulas or leftFormula in self.verified_formulas else False
         
+    
+
+    
+
+        
+
 
     def NOT(self,formula):
 
