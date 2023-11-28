@@ -1,6 +1,4 @@
 import pydot
-# import graphviz
-
 
 class Automate:
     def __init__(self):

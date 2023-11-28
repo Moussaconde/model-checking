@@ -42,10 +42,10 @@ t_RPAREN = r'\)'
 t_ID = r'[B-DH-MP-SWY-Zb-dh-mp-swy-z0-9]+'
 
 # Ignorer les espaces et les tabulations
-t_ignore = ' \t \n'
+t_ignore = ' \t\n'
 
 
-# Operator precedence and associativity
+# précédence des opérateurs en cas d'associativité
 precedence = (
     ('left', 'OR'),
     ('left', 'AND'),
@@ -98,7 +98,7 @@ def p_atomic_formula(p):
     """
     atomic_formula : ID
     """
-    # Gérer la construction de l'arbre syntaxique ici
+    # Gérer la construction de l'arbre syntaxique 
     p[0] = ('ID', p[1])
 
 def p_error(p):
@@ -120,8 +120,6 @@ parser = yacc.yacc()
 
 
 class CTL_Evaluateur:
-    """ Classe qui permettant """
-
 
     def __init__(self, automate:Automate):
         self.automate = copy.deepcopy(automate)
@@ -195,8 +193,6 @@ class CTL_Evaluateur:
                 innerFormuleOperator = formula[1][0]
                 if innerFormuleOperator == 'U':
                     return self.AU(formula)
-            # elif operator == 'U':
-            #     return self.U(formula)
             elif operator == '^':
                 return self.AND(formula)
             elif operator == 'v':
@@ -228,7 +224,6 @@ class CTL_Evaluateur:
 
         
     def EX(self, formula):
-        # Check if the formula is true for at least one successor of the current state
         """
         Marque les états de l'automate pour la formule CTL EX(psi).
         Utilise l'algorithme de marquage fourni.
@@ -238,7 +233,6 @@ class CTL_Evaluateur:
         
         self.verified_formulas[formula] = False
         
-        # Recuperer la sous formule de EX 
         _, innerformula = formula 
         
         self.mark_states_to_false(formula)
@@ -256,8 +250,6 @@ class CTL_Evaluateur:
     def EU(self,formula):
 
         print("Appel à EU ---------> ")
-
-        # self.mark_states_to_false(formula)
 
         _, *operands = formula
 
@@ -279,21 +271,20 @@ class CTL_Evaluateur:
 
         L = set()
 
-        # marking(ψ2)
         for state in self.automate.node_names:
-            if self.markings[rightFormula][state]:  # Vérifie si q.ψ2 est True
-                L.add(state)  # Ajoute q à l'ensemble L
+            if self.markings[rightFormula][state]: 
+                L.add(state)  
 
-        while L:  # Tant que L n'est pas vide
-            state = L.pop()  # Prend un élément q de L et le supprime de L
-            self.markings[formula][state] = True  # Met à jour q.φ à True
+        while L:
+            state = L.pop() 
+            self.markings[formula][state] = True
 
-            # parcours de toutes les transitions (q', _, q) dans T
+            
             for from_state, _ in self.automate.transitions:
-                if not degreeS[from_state]['degree']:  # Vérifie si q'.degree est False
-                    degreeS[from_state]['degree'] = True  # Met q'.degree à True
-                    if self.markings[leftFormula][from_state]:  # Vérifie si q'.ψ1 est True
-                        L.add(from_state)  # Ajoute q' à l'ensemble L
+                if not degreeS[from_state]['degree']: 
+                    degreeS[from_state]['degree'] = True 
+                    if self.markings[leftFormula][from_state]:  
+                        L.add(from_state) 
 
         self.verified_formulas[formula] = self.markings[formula][self.automate.init_node]
     
@@ -323,7 +314,6 @@ class CTL_Evaluateur:
 
         _, innerformula = formula
 
-        # not (true U not  phi)
         equivalent_formula = ('not',('A',('U','true',('not',innerformula))))
 
         self.mark_formula(equivalent_formula)
@@ -380,15 +370,13 @@ class CTL_Evaluateur:
             if not state in degreeS.keys():
                 degreeS[state] = 0
 
-        # We retrieve all the states q that satisfies the UNTIL(rightFormula) condition 
         for state in self.automate.node_names:
             if self.markings[rightFormula][state]:
                 L.add(state)
 
-        #We go through the list and verify the predecessors of q that verify the left formula
         while L:  
             state = L.pop()
-            self.markings[formula][state] = True  # Met à jour q.φ à True
+            self.markings[formula][state] = True
 
             for from_state, _ in self.automate.transitions:
                 
@@ -399,8 +387,6 @@ class CTL_Evaluateur:
                 if from_degree == 0 and self.markings[leftFormula][from_state] and (not self.markings[formula][from_state]):
                     L.add(from_state)
         
-        # self.verified_formulas[formula] = all([val for _,val in self.markings[formula].items()])
-        # print("Fromule :AND", formula ,self.markings[formula].items())
         self.verified_formulas[formula] = [val for _,val in self.markings[formula].items()][0]
 
 
@@ -442,9 +428,6 @@ class CTL_Evaluateur:
 
         self.verified_formulas[formula] = self.markings[formula][self.automate.init_node]
 
-    # I want to implement the IMPL formula so that I can use it in the CTL parser
-    # Normally I should use the same methodolgy as the other formulas where i use equivalent formulas 
-    # I want you to implement it in the same way as the other formulas
 
     def IMPL(self,formula):
         print("Appel à IMPL ---------> ")
@@ -486,8 +469,6 @@ class CTL_Evaluateur:
         
         self.verified_formulas[formula] = (self.verified_formulas[leftFormula] and self.verified_formulas[rightFormula]) if rightFormula in self.verified_formulas and leftFormula in self.verified_formulas else False
 
-    # def U(self,formula):
-    #     self.EU(formula)
 
     def OR(self, formula):
 
@@ -508,12 +489,6 @@ class CTL_Evaluateur:
         self.verified_formulas[formula] = (self.verified_formulas[leftFormula] or self.verified_formulas[rightFormula]) if rightFormula in self.verified_formulas or leftFormula in self.verified_formulas else False
         
     
-
-    
-
-        
-
-
     def NOT(self,formula):
 
         print("Appel à NOT ---------> ")
